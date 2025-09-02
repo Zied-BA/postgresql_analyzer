@@ -1,0 +1,210 @@
+# DVD Data Checker Configuration
+# PostgreSQL database connection and application settings
+
+database:
+  host: localhost
+  port: 5432
+  database: dvdrental
+  user: postgres
+  password: postgres
+  # Connection pool settings
+  min_connections: 1
+  max_connections: 10
+  connection_timeout: 30
+
+# Analysis settings
+analysis:
+  # Default schema and table settings
+  default_schema: "stg_schema"
+  default_table: null  # null means analyze all tables in schema
+  
+  # Schema and table selection
+  schemas:
+    - "public"
+    - "information_schema"
+    - "pg_catalog"
+    # Add your custom schemas here
+    - "stg_schema"
+    - "lds_schema"
+    - "ids_schema"
+    - "dms_schema"
+    # - "custom_schema2"
+  
+  # Tables to exclude from analysis (glob patterns)
+  exclude_tables:
+    - "pg_*"
+    - "sql_*"
+    - "*_temp"
+    - "*_backup"
+  
+  # Missing value analysis
+  missing_values:
+    enabled: true
+    critical_threshold: 30  # Percentage of missing values considered critical
+    high_threshold: 20      # Percentage of missing values considered high
+    medium_threshold: 5     # Percentage of missing values considered medium
+  
+  # Duplicate analysis
+  duplicates:
+    enabled: true
+    critical_threshold: 15  # Percentage of duplicates considered critical
+    high_threshold: 10      # Percentage of duplicates considered high
+    medium_threshold: 3     # Percentage of duplicates considered medium
+  
+  # Date gap analysis
+  date_gaps:
+    enabled: true
+    critical_gap_days: 3   # Number of days considered critical gap
+    high_gap_days: 2        # Number of days considered high priority gap
+    medium_gap_days: 1      # Number of days considered medium priority gap
+
+# DVD return checking settings
+dvd_returns:
+  enabled: true
+  overdue_threshold_days: 7  # Days after which a rental is considered overdue
+  critical_overdue_days: 30  # Days after which a rental is critically overdue
+  multiple_overdue_threshold: 2  # Number of overdue rentals to flag customer
+  
+  # Fee calculation
+  fees:
+    grace_period_days: 7     # Days before late fees start
+    daily_fee_rate: 0.5      # Daily fee as percentage of rental rate (0.5 = 50%)
+    max_daily_fee_rate: 1.0  # Maximum daily fee rate
+
+# Email settings
+email:
+  enabled: true
+  # Email templates
+  templates:
+    overdue_reminder:
+      subject: "DVD Rental Overdue - Action Required"
+      priority: "normal"
+    
+    multiple_overdue_warning:
+      subject: "Multiple Overdue Rentals - Urgent Action Required"
+      priority: "high"
+    
+    critical_overdue_final:
+      subject: "FINAL NOTICE - Overdue Rentals Requiring Immediate Action"
+      priority: "urgent"
+    
+    data_quality_issue:
+      subject: "Account Information Update Required"
+      priority: "normal"
+
+# Reporting settings
+reporting:
+  # Output directory for reports
+  output_directory: "output/reports"
+  
+  # Report formats
+  formats:
+    - "text"
+    - "csv"
+    - "json"
+  
+  # Report retention (days)
+  retention_days: 30
+  
+  # Email report settings
+  email_reports:
+    enabled: false
+    recipients: []
+    subject_prefix: "[DVD Data Checker]"
+
+# Logging settings
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "dvd_data_checker.log"
+  max_size_mb: 10
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Performance settings
+performance:
+  # Database query timeout (seconds)
+  query_timeout: 300
+  
+  # Batch size for large operations
+  batch_size: 1000
+  
+  # Maximum concurrent connections
+  max_concurrent_connections: 5
+  
+  # Memory limit for large datasets (MB)
+  memory_limit_mb: 512
+
+# Business rules
+business_rules:
+  # Customer data requirements
+  customer:
+    required_fields:
+      - "first_name"
+      - "last_name"
+      - "email"
+    email_validation: true
+    phone_validation: false
+  
+  # Rental data requirements
+  rental:
+    required_fields:
+      - "rental_date"
+      - "customer_id"
+      - "inventory_id"
+    max_rental_duration_days: 14
+    grace_period_days: 7
+  
+  # Film data requirements
+  film:
+    required_fields:
+      - "title"
+      - "release_year"
+      - "rental_rate"
+    min_rental_rate: 0.99
+    max_rental_rate: 9.99
+
+# Test data settings
+test_data:
+  enabled: false  # Set to true to enable test data generation
+  include_issues: true  # Include data quality issues in test data
+  customer_count: 100
+  film_count: 50
+  rental_count: 200
+  payment_count: 150
+  address_count: 50
+
+# Security settings
+security:
+  # Database connection encryption
+  ssl_mode: "prefer"  # disable, allow, prefer, require, verify-ca, verify-full
+  
+  # Credential encryption
+  encrypt_passwords: false
+  
+  # Audit logging
+  audit_logging: true
+  audit_file: "audit.log"
+
+# Notification settings
+notifications:
+  # Slack integration
+  slack:
+    enabled: false
+    webhook_url: ""
+    channel: "#dvd-data-checker"
+  
+  # Email notifications
+  email_notifications:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    username: ""
+    password: ""
+    from_address: ""
+    to_addresses: []
+  
+  # Webhook notifications
+  webhook:
+    enabled: false
+    url: ""
+    timeout: 30
